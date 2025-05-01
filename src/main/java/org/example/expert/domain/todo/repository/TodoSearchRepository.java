@@ -9,5 +9,7 @@ import java.time.LocalDateTime;
 
 public interface TodoSearchRepository {
 
-    Page<Todo> searchTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+    Page<Todo> getTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
+
+    Todo getTodo(long todoId);
 }

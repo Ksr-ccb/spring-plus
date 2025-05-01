@@ -1,5 +1,6 @@
 package org.example.expert.domain.todo.repository;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.example.expert.domain.todo.entity.Todo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,13 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Repository
 @RequiredArgsConstructor
 public class TodoSearchRepositoryImpl implements TodoSearchRepository {
 
     private final EntityManager entityManager;
 
     @Override
-    public Page<Todo> searchTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+    public Page<Todo> getTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         StringBuilder jpql = new StringBuilder("SELECT t FROM Todo t LEFT JOIN FETCH t.user u ");
         Map<String, Object> params = new HashMap<>();
         List<String> whereList = new ArrayList<>();
@@ -58,4 +61,10 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
 
         return new PageImpl<>(result, pageable, result.size());
     }
+
+    @Override
+    public Todo getTodo(long todoId) {
+        return null;
+    }
+
 }

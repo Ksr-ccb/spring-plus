@@ -57,7 +57,7 @@ public class TodoService {
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.searchTodos(weather, startDate, endDate, pageable);
+        Page<Todo> todos = todoRepository.getTodos(weather, startDate, endDate, pageable);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
