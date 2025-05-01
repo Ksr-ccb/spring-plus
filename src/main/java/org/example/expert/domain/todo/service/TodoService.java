@@ -17,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +51,7 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDate startDate, LocalDate endDate) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDateTime startDate, LocalDateTime endDate) {
         //Weather 조건 검색 -> 값이 있나없나 검증 부터
         //수정일 기준으로 기간 검색 - 기간 시작/끝 값이 있을수도있고 없을수도 있고..,
 

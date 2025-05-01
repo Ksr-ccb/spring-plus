@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
     private final EntityManager entityManager;
 
     @Override
-    public Page<Todo> searchTodos(String weather, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    public Page<Todo> searchTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         StringBuilder jpql = new StringBuilder("SELECT t FROM Todo t LEFT JOIN FETCH t.user u ");
         Map<String, Object> params = new HashMap<>();
         List<String> whereList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
             jpql.append(" WHERE ").append(String.join(" AND ", whereList));
         }
         //정렬 조건 마지막에 넣어줌
-        jpql.append("ORDER BY t.modifiedAt DESC");
+        jpql.append(" ORDER BY t.modifiedAt DESC");
 
         TypedQuery<Todo> query = entityManager.createQuery(jpql.toString(), Todo.class);
         params.forEach(query::setParameter);

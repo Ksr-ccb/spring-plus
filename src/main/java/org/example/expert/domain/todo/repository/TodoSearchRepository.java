@@ -5,8 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface TodoSearchRepository {
 
-    Page<Todo> searchTodos(String weather, LocalDate startDate, LocalDate endDate, Pageable pageable);
+    Page<Todo> searchTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 }
