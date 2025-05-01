@@ -4,6 +4,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
+import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -17,10 +19,15 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-@RequiredArgsConstructor
 public class TodoSearchRepositoryImpl implements TodoSearchRepository {
 
     private final EntityManager entityManager;
+    private final JPAQueryFactory jpaQueryFactory;
+
+    public TodoSearchRepositoryImpl(EntityManager entityManager) {
+        this.entityManager = entityManager;
+        this.jpaQueryFactory = new JPAQueryFactory(entityManager); // 생성자에서 초기화
+    }
 
     @Override
     public Page<Todo> getTodos(String weather, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
@@ -64,7 +71,17 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
 
     @Override
     public Todo getTodo(long todoId) {
-        return null;
+        QTodo qTodo = QTodo.todo;
+
+        Todo todo = jpaQueryFactory.selectFrom(qTodo)
+                .where(qTodo.id.eq(todoId))
+                .fetchOne();
+
+        if(todo == null){
+            throw new InvalidRequestException("Todo not found");
+        }
+
+        return todo;
     }
 
 }
