@@ -3,12 +3,14 @@ package org.example.expert.domain.todo.repository;
 import jakarta.persistence.EntityManager;
 import org.example.expert.config.JwtUtil;
 import org.example.expert.domain.common.dto.AuthUser;
+import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -57,33 +60,71 @@ class TodoRepositoryTest {
         entityManager.clear();
     }
 
-    @Test
-    @DisplayName(" searchTodos 성공 - 조건 다있음")
-    void searchTodos_success_withAllard(){
+    @Nested
+    @DisplayName("GetTodosTests")
+    class GetTodosTests {
+        @Test
+        @DisplayName(" searchTodos 성공 - 조건 다있음")
+        void searchTodos_success_withAllard(){
 
-        //given
-        String weather = "RAINY";
-        LocalDateTime startDate =  LocalDateTime.of(2025, 4, 1, 13, 30, 0);
-        LocalDateTime endDate = LocalDateTime.of(2025, 5, 2, 13, 30, 0);
-        Pageable pageable = PageRequest.of(0,10);
+            //given
+            String weather = "RAINY";
+            LocalDateTime startDate =  LocalDateTime.of(2025, 4, 1, 13, 30, 0);
+            LocalDateTime endDate = LocalDateTime.of(2025, 5, 2, 13, 30, 0);
+            Pageable pageable = PageRequest.of(0,10);
 
-        //when
-        Page<Todo> todos = todoRepository.searchTodos(weather, startDate, endDate, pageable);
+            //when
+            Page<Todo> todos = todoRepository.getTodos(weather, startDate, endDate, pageable);
 
-        //then
-        assertThat(todos.getContent()).hasSize(1);
-        assertThat(todos.getContent().get(0).getTitle()).isEqualTo("title1");
+            //then
+            assertThat(todos.getContent()).hasSize(1);
+            assertThat(todos.getContent().get(0).getTitle()).isEqualTo("title1");
+        }
+
+        @Test
+        @DisplayName(" searchTodos 성공 - 조건 다 없음")
+        void searchTodos_success_NoArgument(){
+            //given
+            Pageable pageable = PageRequest.of(0,10);
+            //when
+            Page<Todo> todos = todoRepository.getTodos(null, null, null, pageable);
+
+            //then
+            assertThat(todos.getContent()).hasSize(2);
+        }
     }
 
-    @Test
-    @DisplayName(" searchTodos 성공 - 조건 다 없음")
-    void searchTodos_success_NoArgument(){
-        //given
-        Pageable pageable = PageRequest.of(0,10);
-        //when
-        Page<Todo> todos = todoRepository.searchTodos(null, null, null, pageable);
+    @Nested
+    @DisplayName("GetTodoTests")
+    class GetTodoTests {
 
-        //then
-        assertThat(todos.getContent()).hasSize(2);
+        @Test
+        @DisplayName("getTodo 성공 - 존재하는 Todo ID")
+        void getTodo_Success() {
+            // given
+            Long todoId = 1L;  // 첫 번째 todoId
+
+            // when
+            Todo todo = todoRepository.getTodo(todoId);
+
+            // then
+            assertThat(todo).isNotNull();
+            assertThat(todo.getTitle()).isEqualTo("title1");
+            assertThat(todo.getContents()).isEqualTo("content1");
+        }
+
+        @Test
+        @DisplayName("getTodo 실패 - 존재하지 않는 Todo ID")
+        void getTodo_Failure() {
+            // given
+            Long todoId = 999L;  // 존재하지 않는 todoId
+
+            // when & then
+            InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
+                todoRepository.getTodo(todoId);
+            });
+
+            assertThat(exception.getMessage()).isEqualTo("Todo not found");
+        }
     }
 }
