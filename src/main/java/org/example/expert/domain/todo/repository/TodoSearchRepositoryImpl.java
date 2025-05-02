@@ -74,6 +74,7 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
         QTodo qTodo = QTodo.todo;
 
         Todo todo = jpaQueryFactory.selectFrom(qTodo)
+                .leftJoin(qTodo.user).fetchJoin()
                 .where(qTodo.id.eq(todoId))
                 .fetchOne();
 
