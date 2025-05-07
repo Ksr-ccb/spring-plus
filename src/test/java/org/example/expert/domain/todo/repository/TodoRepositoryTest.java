@@ -7,6 +7,7 @@ import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
+import org.example.expert.testconfig.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-@AutoConfigureMockMvc(addFilters = false)
+@Import(TestSecurityConfig.class)
 class TodoRepositoryTest {
 
     @Autowired
@@ -40,6 +42,8 @@ class TodoRepositoryTest {
     @MockBean
     JwtUtil jwtUtil;
 
+    private Long todo1Id;
+    private Long todo2Id;
 
     @BeforeEach
     void setUp() {
@@ -49,14 +53,16 @@ class TodoRepositoryTest {
         entityManager.flush(); // ID 자동 생성
 
         Todo todo1 = new Todo("title1", "content1", "RAINY", user);
-        ReflectionTestUtils.setField(todo1, "modifiedAt", LocalDateTime.of(2023, 5, 1, 13, 30));
         entityManager.persist(todo1);
 
         Todo todo2 = new Todo("title2", "content2", "SUNNY", user);
-        ReflectionTestUtils.setField(todo2, "modifiedAt", LocalDateTime.of(2025, 5, 1, 13, 30));
+        ReflectionTestUtils.setField(todo2, "modifiedAt", LocalDateTime.of(2025, 4, 1, 13, 30));
         entityManager.persist(todo2);
 
         entityManager.flush();
+
+        todo1Id = todo1.getId();
+        todo2Id = todo2.getId();
         entityManager.clear();
     }
 
@@ -69,12 +75,16 @@ class TodoRepositoryTest {
 
             //given
             String weather = "RAINY";
-            LocalDateTime startDate =  LocalDateTime.of(2025, 4, 1, 13, 30, 0);
-            LocalDateTime endDate = LocalDateTime.of(2025, 5, 2, 13, 30, 0);
+            LocalDateTime startDate =  LocalDateTime.of(2025, 4, 19, 13, 30, 0);
+            LocalDateTime endDate = LocalDateTime.of(2025, 5, 9, 13, 30, 0);
             Pageable pageable = PageRequest.of(0,10);
 
             //when
             Page<Todo> todos = todoRepository.getTodos(weather, startDate, endDate, pageable);
+
+
+            //System.out.println("startDate = " + startDate);
+            //System.out.println("endDate = " + endDate);
 
             //then
             assertThat(todos.getContent()).hasSize(1);
@@ -102,7 +112,7 @@ class TodoRepositoryTest {
         @DisplayName("getTodo 성공 - 존재하는 Todo ID")
         void getTodo_Success() {
             // given
-            Long todoId = 1L;  // 첫 번째 todoId
+            Long todoId = todo1Id;  // 첫 번째 todoId
 
             // when
             Todo todo = todoRepository.getTodo(todoId);
