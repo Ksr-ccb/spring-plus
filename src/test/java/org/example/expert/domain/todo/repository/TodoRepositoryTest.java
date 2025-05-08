@@ -4,16 +4,16 @@ import jakarta.persistence.EntityManager;
 import org.example.expert.config.JwtUtil;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
 import org.example.expert.testconfig.TestSecurityConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -43,11 +43,10 @@ class TodoRepositoryTest {
     JwtUtil jwtUtil;
 
     private Long todo1Id;
-    private Long todo2Id;
 
     @BeforeEach
     void setUp() {
-        AuthUser authUser = new AuthUser(null, "email", "nick", UserRole.USER); // <- id = null
+        AuthUser authUser = new AuthUser(null, "email", "nick", UserRole.ROLE_USER);
         User user = User.fromAuthUser(authUser);
         entityManager.persist(user);
         entityManager.flush(); // ID 자동 생성
@@ -56,13 +55,11 @@ class TodoRepositoryTest {
         entityManager.persist(todo1);
 
         Todo todo2 = new Todo("title2", "content2", "SUNNY", user);
-        ReflectionTestUtils.setField(todo2, "modifiedAt", LocalDateTime.of(2025, 4, 1, 13, 30));
         entityManager.persist(todo2);
 
         entityManager.flush();
 
         todo1Id = todo1.getId();
-        todo2Id = todo2.getId();
         entityManager.clear();
     }
 
@@ -127,7 +124,7 @@ class TodoRepositoryTest {
         @DisplayName("getTodo 실패 - 존재하지 않는 Todo ID")
         void getTodo_Failure() {
             // given
-            Long todoId = 999L;  // 존재하지 않는 todoId
+            long todoId = 999L;  // 존재하지 않는 todoId
 
             // when & then
             InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
@@ -137,4 +134,45 @@ class TodoRepositoryTest {
             assertThat(exception.getMessage()).isEqualTo("Todo not found");
         }
     }
+
+    @Nested
+    @DisplayName("GetTodosTests")
+    class searchTodosTests{
+
+        @Test
+        @DisplayName("searchTodos - 제목에 'ti' 포함 조건")
+        void searchTodos_titleCondition() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<TodoSearchResponse> result = todoRepository.searchTodos(pageable, null, "ti", null, null);
+
+            assertThat(result).hasSize(2);
+            assertThat(result.getContent().get(0).getTitle()).contains("ti");
+        }
+
+        @Test
+        @DisplayName("searchTodos - 날짜 조건 적용")
+        void searchTodos_dateRangeCondition() {
+            Pageable pageable = PageRequest.of(0, 10);
+
+            LocalDateTime start = LocalDateTime.of(2024, 5, 1, 0, 0);
+            LocalDateTime end = LocalDateTime.of(2024, 5, 1, 23, 59);
+
+            Page<TodoSearchResponse> result = todoRepository.searchTodos(pageable, null, null, start, end);
+
+            assertThat(result).hasSize(0);
+        }
+
+        @Test
+        @DisplayName("searchTodos - 페이징 확인")
+        void searchTodos_pagingTest() {
+            Pageable pageable = PageRequest.of(0, 1); // 한 페이지당 1개
+
+            Page<TodoSearchResponse> result = todoRepository.searchTodos(pageable, null, null, null, null);
+
+            assertThat(result.getTotalElements()).isEqualTo(2);
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getTotalPages()).isEqualTo(2);
+        }
+    }
+
 }

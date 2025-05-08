@@ -1,16 +1,22 @@
 package org.example.expert.domain.todo.repository;
 
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import lombok.RequiredArgsConstructor;
+
+import org.example.expert.domain.comment.entity.QComment;
 import org.example.expert.domain.common.exception.InvalidRequestException;
+import org.example.expert.domain.manager.entity.QManager;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.QTodo;
 import org.example.expert.domain.todo.entity.Todo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -84,5 +90,58 @@ public class TodoSearchRepositoryImpl implements TodoSearchRepository {
 
         return todo;
     }
+
+    @Override
+    public Page<TodoSearchResponse> searchTodos(Pageable pageable, String nickname, String title, LocalDateTime startDate, LocalDateTime endDate) {
+        QTodo qTodo = QTodo.todo;
+        QManager qManager = QManager.manager;
+        QComment qComment = QComment.comment;
+
+        List<TodoSearchResponse> result = jpaQueryFactory
+                .select(Projections.fields(TodoSearchResponse.class,
+                        qTodo.title.as("title"),
+                        qManager.countDistinct().as("managerCount"),
+                        qComment.countDistinct().as("commentCount")
+                ))
+                .from(qTodo)
+                .leftJoin(qTodo.managers, qManager)
+                .leftJoin(qTodo.comments, qComment)
+                .groupBy(qTodo.id)
+                .where(
+                        StringUtils.hasText(title) ? qTodo.title.contains(title) : null,
+                        StringUtils.hasText(nickname) ? qTodo.user.nickname.contains(nickname) : null,
+                        dateBetween(startDate, endDate, qTodo)
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        Long totalSize = jpaQueryFactory
+                .select(qTodo.countDistinct())
+                .from(qTodo)
+                .leftJoin(qTodo.managers, qManager)
+                .leftJoin(qTodo.comments, qComment)
+                .where(
+                        StringUtils.hasText(title) ? qTodo.title.contains(title) : null,
+                        StringUtils.hasText(nickname) ? qTodo.user.nickname.contains(nickname) : null,
+                        dateBetween(startDate, endDate, qTodo)
+                )
+                .fetchOne();
+
+        return new PageImpl<>(result, pageable, totalSize);
+    }
+
+    private BooleanExpression dateBetween(LocalDateTime start, LocalDateTime end, QTodo qTodo) {
+        if (start != null && end != null) {
+            return qTodo.modifiedAt.between(start, end);
+        } else if (start != null) {
+            return qTodo.modifiedAt.goe(start);
+        } else if (end != null) {
+            return qTodo.modifiedAt.loe(end);
+        } else {
+            return null;
+        }
+    }
+
 
 }
