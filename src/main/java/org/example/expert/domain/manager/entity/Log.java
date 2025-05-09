@@ -28,6 +28,7 @@ public class Log extends Timestamped {
     @JoinColumn(name = "todo_id", nullable = true)
     private Todo todo;
 
+    @Enumerated(EnumType.STRING)
     private LogStatus status;
 
     public Log(User user, Todo todo, LogStatus status) {

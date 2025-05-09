@@ -20,6 +20,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+        System.out.println("in SecurityConfig");
+
         return http
                 //이건 basic auth 사용안한다는 표기인ㄷㅔ REST API 사용중이라 disable 해놓으면됨
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -36,7 +38,7 @@ public class SecurityConfig {
                 // [4] URL별 권한 설정
                 .authorizeHttpRequests(auth-> auth
                         // [5] 인증/인가 정책 설정
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/actuator/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

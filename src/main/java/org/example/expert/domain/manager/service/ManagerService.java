@@ -66,8 +66,8 @@ public class ManagerService {
 
         }catch (Exception e){
             logService.saveLog(user,todo, LogStatus.FAIL);
+            throw e;
         }
-        return null;
     }
 
     @Transactional(readOnly = true)
