@@ -10,7 +10,9 @@ import org.example.expert.domain.user.enums.UserRole;
 @Getter
 @Entity
 @NoArgsConstructor
-@Table(name = "users")
+@Table(name = "users"
+        ,indexes = @Index(name="nickname", columnList = "nickname")
+)
 public class User extends Timestamped {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +32,7 @@ public class User extends Timestamped {
         this.userRole = userRole;
     }
 
-    private User(Long id, String email, String nickname, UserRole userRole) {
+    public User(Long id, String email, String nickname, UserRole userRole) {
         this.id = id;
         this.email = email;
         this.nickname = nickname;

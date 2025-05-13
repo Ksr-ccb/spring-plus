@@ -41,8 +41,13 @@ public class UserController {
 
     @DeleteMapping("/profileImg")
     public ResponseEntity<UserProfileRepsonse> uploadProfileImge(
-            @Auth AuthUser authUser) throws IOException {
+            @Auth AuthUser authUser){
         return ResponseEntity.ok(s3Service.delete(authUser));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<UserResponse> searchUser(@RequestParam String nickname) {
+        return ResponseEntity.ok(userService.searchUser(nickname));
     }
 
 }
