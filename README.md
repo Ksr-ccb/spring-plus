@@ -22,7 +22,7 @@
  - QueryDSL 을 사용하여 검색 기능 만들기
  - Transaction 심화
  - AWS 활용 (비용이 나가서 중단했습니다)
-![image](https://velog.velcdn.com/images/tofha054/post/427ed8b8-7a91-4597-a58e-639bcd9f8c48/image.png)
+![image](https://github.com/user-attachments/assets/a3f44b60-1cc9-417f-a83e-a49dcd669b15)
 ![image](https://velog.velcdn.com/images/tofha054/post/67b5c24b-8243-4888-9df9-54a438f29b70/image.png)
 ![image](https://velog.velcdn.com/images/tofha054/post/9a897f07-20d2-462e-b3d0-b26a0e5b3217/image.png)
 ![image](https://velog.velcdn.com/images/tofha054/post/cccb1681-34c5-4223-97fb-6276b5ded53d/image.png)
