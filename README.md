@@ -27,7 +27,9 @@
 ![image](https://velog.velcdn.com/images/tofha054/post/9a897f07-20d2-462e-b3d0-b26a0e5b3217/image.png)
 ![image](https://velog.velcdn.com/images/tofha054/post/cccb1681-34c5-4223-97fb-6276b5ded53d/image.png)
  - 대용량 데이터 처리
+     - 전
 ![스크린샷 2025-05-13 122806](https://github.com/user-attachments/assets/2dc57d60-7434-4df9-83ac-7fe6802406eb)
+     - 후 
 ![스크린샷 2025-05-13 122858](https://github.com/user-attachments/assets/bdebc23e-b893-4ab1-9e32-b47a5eea361a)
 
 
